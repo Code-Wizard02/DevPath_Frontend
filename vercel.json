@@ -1,0 +1,5 @@
+{
+  "buildCommand": "vite build && node scripts/generate-index.mjs",
+  "outputDirectory": "dist/client",
+  "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }]
+}
