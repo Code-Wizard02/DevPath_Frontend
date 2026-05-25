@@ -464,22 +464,20 @@ function Nav() {
           </a>
         </div>
         <div className="flex gap-3">
-          <button
-            className="rounded-lg px-4 py-2 text-sm font-semibold uppercase tracking-wide transition-colors"
-            style={{ color: "var(--text-muted)", background: "rgba(255,255,255,0.06)" }}
-            onMouseEnter={(e) => (e.currentTarget.style.background = "rgba(255,255,255,0.12)")}
-            onMouseLeave={(e) => (e.currentTarget.style.background = "rgba(255,255,255,0.06)")}
+          <a
+            href="/dashboard"
+            className="rounded-lg px-4 py-2 text-sm font-semibold uppercase tracking-wide transition-colors hover:bg-white/10"
+            style={{ color: "var(--text-muted)" }}
           >
             Iniciar sesion
-          </button>
-          <button
-            className="rounded-lg px-4 py-2 text-sm font-semibold uppercase tracking-wide text-white transition-all duration-200"
+          </a>
+          <a
+            href="#formulario"
+            className="rounded-lg px-4 py-2 text-sm font-semibold uppercase tracking-wide text-white transition-opacity hover:opacity-85"
             style={{ background: "var(--brand)", color: "var(--canvas-deep)" }}
-            onMouseEnter={(e) => (e.currentTarget.style.opacity = "0.85")}
-            onMouseLeave={(e) => (e.currentTarget.style.opacity = "1")}
           >
             Aplicar
-          </button>
+          </a>
         </div>
       </div>
     </nav>
@@ -537,25 +535,15 @@ function Index() {
               <div className="mt-8 flex flex-wrap gap-3">
                 <a
                   href="#formulario"
-                  className="inline-block rounded-lg px-6 py-3 text-sm font-semibold uppercase tracking-wide text-white transition-all duration-200"
+                  className="inline-block rounded-lg px-6 py-3 text-sm font-semibold uppercase tracking-wide text-white transition-opacity hover:opacity-85"
                   style={{ background: "var(--brand)", color: "var(--canvas-deep)" }}
-                  onMouseEnter={(e) => (e.currentTarget.style.opacity = "0.85")}
-                  onMouseLeave={(e) => (e.currentTarget.style.opacity = "1")}
                 >
                   Aplicar ahora
                 </a>
                 <a
                   href="#programa"
-                  className="inline-block rounded-lg px-6 py-3 text-sm font-semibold uppercase tracking-wide transition-colors"
+                  className="inline-block rounded-lg px-6 py-3 text-sm font-semibold uppercase tracking-wide transition-colors hover:border-white/50 hover:text-white"
                   style={{ color: "var(--text-muted)", border: "1px solid var(--border-dark)" }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.borderColor = "var(--text-muted)";
-                    e.currentTarget.style.color = "#fff";
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.borderColor = "var(--border-dark)";
-                    e.currentTarget.style.color = "var(--text-muted)";
-                  }}
                 >
                   Ver programa
                 </a>
@@ -612,11 +600,8 @@ function Index() {
               style={{ background: "linear-gradient(to bottom, var(--brand), var(--border-dark))" }}
             />
             <div className="space-y-12 md:space-y-16">
-              {PROGRAM_PHASES.map((phase, i) => (
-                <div
-                  key={phase.num}
-                  className={`animate-fade-up relative pl-14 md:pl-16 delay-${(i + 1) * 100}`}
-                >
+              {PROGRAM_PHASES.map((phase) => (
+                <div key={phase.num} className="animate-fade-up relative pl-14 md:pl-16">
                   <div
                     className="absolute left-3 top-1 flex h-6 w-6 items-center justify-center rounded-full text-[10px] font-bold md:left-4 md:h-7 md:w-7"
                     style={{ background: "var(--brand)", color: "var(--canvas-deep)" }}
@@ -687,10 +672,10 @@ function Index() {
             </h2>
           </div>
           <div className="grid gap-5 md:grid-cols-3">
-            {TESTIMONIALS.map((t, i) => (
+            {TESTIMONIALS.map((t) => (
               <div
                 key={t.name}
-                className={`animate-fade-up rounded-2xl border p-7 transition-colors hover:border-brand/30 delay-${(i + 1) * 100} ${t.featured ? "md:col-span-2 md:p-10" : ""}`}
+                className={`animate-fade-up rounded-2xl border p-7 transition-colors hover:border-brand/30 ${t.featured ? "md:col-span-2 md:p-10" : ""}`}
                 style={{
                   background: "var(--canvas-elevated)",
                   borderColor: "var(--border-dark)",
@@ -750,10 +735,8 @@ function Index() {
             <div className="mt-8 flex flex-wrap justify-center gap-4">
               <a
                 href="#formulario"
-                className="inline-block rounded-lg px-8 py-3.5 text-sm font-semibold uppercase tracking-wide text-white transition-all duration-200"
+                className="inline-block rounded-lg px-8 py-3.5 text-sm font-semibold uppercase tracking-wide text-white transition-opacity hover:opacity-85"
                 style={{ background: "var(--brand)", color: "var(--canvas-deep)" }}
-                onMouseEnter={(e) => (e.currentTarget.style.opacity = "0.85")}
-                onMouseLeave={(e) => (e.currentTarget.style.opacity = "1")}
               >
                 Aplicar ahora
               </a>
