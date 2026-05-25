@@ -1,6 +1,15 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState, useCallback, memo } from "react";
 
+if (typeof window !== "undefined") {
+  window.addEventListener("error", (e) => {
+    console.error("[DASHBOARD ERROR]", e.error?.message || e.message);
+  });
+  window.addEventListener("unhandledrejection", (e) => {
+    console.error("[DASHBOARD UNHANDLED]", e.reason?.message || e.reason);
+  });
+}
+
 export const Route = createFileRoute("/dashboard")({
   component: Dashboard,
   head: () => ({
@@ -319,9 +328,129 @@ const MobileDetailPanel = memo(function MobileDetailPanel({
   );
 });
 
+const DEMO_LEADS: Lead[] = [
+  {
+    id: "demo-1",
+    nombre: "Ana Torres",
+    lada: "+52",
+    telefono: "55 1234 1234",
+    email: "ana.torres@email.com",
+    inicio: "Este mes",
+    source: "devpath-landing",
+    submittedAt: "2026-05-23T23:06:17.249Z",
+    status: "qualified",
+    score: "72",
+    category: "lead_calificado",
+    presupuesto: "alto",
+    interes: "alta",
+    prioridad: "media",
+    accion: "contactar_asesor",
+    summary: "Está interesada, busca financiamiento y podría iniciar en 1-3 meses.",
+    preguntas:
+      "mejor horario para llamar después, capacidad real de pago mensual, nivel actual de conocimientos",
+    senalesPositivas:
+      "dijo estar interesada en aprender a programar, busca financiamiento en lugar de descartar por presupuesto",
+    senalesNegativas:
+      "presupuesto limitado de aproximadamente 1000 pesos, está explorando opciones",
+    mensaje:
+      "Hola, gracias por tu interés. Te comparto información sobre el programa y opciones de financiamiento.",
+  },
+  {
+    id: "demo-2",
+    nombre: "Carlos Mendoza",
+    lada: "+52",
+    telefono: "55 9876 5432",
+    email: "carlos.mendoza@email.com",
+    inicio: "En 1 a 3 meses",
+    source: "devpath-landing",
+    submittedAt: "2026-05-22T15:30:00.000Z",
+    status: "qualified",
+    score: "85",
+    category: "lead_calificado",
+    presupuesto: "alto",
+    interes: "alta",
+    prioridad: "alta",
+    accion: "contactar_asesor",
+    summary: "Muy interesado, cuenta con presupuesto disponible y quiere empezar lo antes posible.",
+    preguntas: "confirmar fecha de inicio, revisar requisitos técnicos, detalle de horarios",
+    senalesPositivas:
+      "presupuesto suficiente, experiencia previa básica en HTML, dispuesto a dedicar tiempo completo",
+    senalesNegativas: "ninguna señal negativa identificada",
+    mensaje:
+      "Hola Carlos, nos da gusto tu interés. Podemos agendar una llamada para resolver tus dudas y comenzar.",
+  },
+  {
+    id: "demo-3",
+    nombre: "Sofia Ramirez",
+    lada: "+52",
+    telefono: "55 4321 8765",
+    email: "sofia.ramirez@email.com",
+    inicio: "Solo explorando",
+    source: "devpath-landing",
+    submittedAt: "2026-05-21T10:15:00.000Z",
+    status: "qualified",
+    score: "45",
+    category: "lead_frio",
+    presupuesto: "baja",
+    interes: "media",
+    prioridad: "baja",
+    accion: "enviar_informacion",
+    summary: "Está explorando opciones, sin prisa por comenzar y presupuesto limitado.",
+    preguntas: "objetivo profesional a largo plazo, disponibilidad de tiempo, interés en becas",
+    senalesPositivas: "tiene interés genuino en cambiar de carrera, investigó sobre el bootcamp",
+    senalesNegativas: "presupuesto muy limitado, horario complicado por trabajo actual",
+    mensaje:
+      "Hola Sofia, te enviamos información sobre nuestras becas y opciones de pago flexibles.",
+  },
+  {
+    id: "demo-4",
+    nombre: "Miguel Angel Lopez",
+    lada: "+52",
+    telefono: "55 6789 1234",
+    email: "miguel.lopez@email.com",
+    inicio: "Este mes",
+    source: "devpath-landing",
+    submittedAt: "2026-05-20T18:45:00.000Z",
+    status: "pending",
+    score: "",
+    category: "sin_calificar",
+    presupuesto: "-",
+    interes: "-",
+    prioridad: "-",
+    accion: "pendiente",
+    summary: "Sin calificación aún",
+    preguntas: "",
+    senalesPositivas: "",
+    senalesNegativas: "",
+    mensaje: "",
+  },
+  {
+    id: "demo-5",
+    nombre: "Daniela Vega",
+    lada: "+52",
+    telefono: "55 1122 3344",
+    email: "daniela.vega@email.com",
+    inicio: "En 1 a 3 meses",
+    source: "devpath-landing",
+    submittedAt: "2026-05-19T09:30:00.000Z",
+    status: "qualified",
+    score: "63",
+    category: "lead_calificado",
+    presupuesto: "media",
+    interes: "alta",
+    prioridad: "media",
+    accion: "contactar_asesor",
+    summary: "Interesada pero con dudas sobre financiamiento. Presupuesto medio.",
+    preguntas: "opciones de pago mensual, duración del programa, horario de clases",
+    senalesPositivas: "muy motivada, ya investigó sobre el programa, tiene apoyo familiar",
+    senalesNegativas: "presupuesto ajustado, necesita convencer a su familia",
+    mensaje: "Hola Daniela, podemos agendar una llamada para explicarte nuestras opciones de pago.",
+  },
+];
+
 function Dashboard() {
-  const [leads, setLeads] = useState<Lead[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [leads, setLeads] = useState<Lead[]>(DEMO_LEADS);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [query, setQuery] = useState("");
   const [expandedId, setExpandedId] = useState<string | null>(null);
@@ -362,7 +491,12 @@ function Dashboard() {
         }
       }
 
-      setLeads(joinLeads(forms, quals));
+      const hasValidData =
+        forms.length > 0 && forms.some((f) => f.nombre && f.nombre !== "Sin nombre");
+
+      if (hasValidData) {
+        setLeads(joinLeads(forms, quals));
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Error al cargar leads");
     } finally {

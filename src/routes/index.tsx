@@ -1,6 +1,15 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState, useEffect, type CSSProperties } from "react";
+import { useState, useEffect } from "react";
 import { z } from "zod";
+
+if (typeof window !== "undefined") {
+  window.addEventListener("error", (e) => {
+    console.error("[GLOBAL ERROR]", e.error?.message || e.message, e.error?.stack);
+  });
+  window.addEventListener("unhandledrejection", (e) => {
+    console.error("[UNHANDLED REJECTION]", e.reason?.message || e.reason);
+  });
+}
 
 export const Route = createFileRoute("/")({
   component: Index,
@@ -38,7 +47,6 @@ const leadSchema = z.object({
 type LeadErrors = Partial<Record<keyof typeof leadSchema.shape, string>>;
 
 function LeadForm() {
-  const [accepted, setAccepted] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -92,7 +100,7 @@ function LeadForm() {
     <form
       onSubmit={async (e) => {
         e.preventDefault();
-        if (!accepted || submitting) return;
+        if (submitting) return;
         const result = leadSchema.safeParse({ nombre, telefono, email, inicio });
         if (!result.success) {
           const errors: LeadErrors = {};
@@ -157,7 +165,6 @@ function LeadForm() {
             setTelefono("9512103083");
             setEmail("whoangel.agl@gmail.com");
             setInicio("En 1 a 3 meses");
-            setAccepted(true);
             setFieldErrors({});
           }}
           className="shrink-0 rounded-md px-2.5 py-1.5 text-[10px] font-semibold uppercase tracking-wide hover:opacity-80"
@@ -350,9 +357,9 @@ function LeadForm() {
         <div className="mt-1 flex items-start gap-3">
           <input
             type="checkbox"
-            checked={accepted}
-            onChange={(e) => setAccepted(e.target.checked)}
-            className="mt-0.5 h-4 w-4 cursor-pointer"
+            defaultChecked
+            disabled
+            className="mt-0.5 h-4 w-4 cursor-not-allowed"
             style={{ accentColor: "var(--brand)" }}
           />
           <span className="text-xs leading-relaxed" style={{ color: "var(--text-muted)" }}>
@@ -374,7 +381,7 @@ function LeadForm() {
         )}
         <button
           type="submit"
-          disabled={!accepted || submitting}
+          disabled={submitting}
           style={{
             width: "100%",
             borderRadius: 8,
@@ -383,11 +390,11 @@ function LeadForm() {
             fontWeight: 600,
             textTransform: "uppercase",
             letterSpacing: "0.05em",
-            background: accepted && !submitting ? "var(--brand)" : "var(--canvas-deep)",
-            color: accepted && !submitting ? "var(--canvas-deep)" : "var(--text-dim)",
-            cursor: accepted && !submitting ? "pointer" : "not-allowed",
+            background: !submitting ? "var(--brand)" : "var(--canvas-deep)",
+            color: !submitting ? "var(--canvas-deep)" : "var(--text-dim)",
+            cursor: !submitting ? "pointer" : "not-allowed",
             border: "none",
-            boxShadow: accepted && !submitting ? "0 4px 20px var(--brand-glow)" : undefined,
+            boxShadow: !submitting ? "0 4px 20px var(--brand-glow)" : undefined,
           }}
         >
           {submitting ? "Enviando..." : "Quiero informacion"}
