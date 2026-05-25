@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useMemo, useState, useCallback } from "react";
+import { useEffect, useMemo, useState, useCallback, memo } from "react";
 
 export const Route = createFileRoute("/dashboard")({
   component: Dashboard,
@@ -97,8 +97,8 @@ function joinLeads(forms: FormLead[], quals: QualificationLead[]): Lead[] {
   }));
 }
 
-function levelBadge(value: string) {
-  const map: Record<string, { bg: string; text: string; dot: string }> = {
+const LevelBadge = memo(function LevelBadge({ value }: { value: string }) {
+  const c = {
     alto: {
       bg: "oklch(0.78 0.14 145 / 0.12)",
       text: "oklch(0.38 0.12 145)",
@@ -114,8 +114,7 @@ function levelBadge(value: string) {
       text: "oklch(0.55 0.12 25)",
       dot: "oklch(0.55 0.12 25)",
     },
-  };
-  const c = map[value.toLowerCase()] ?? {
+  }[value.toLowerCase()] ?? {
     bg: "oklch(0.94 0.004 106)",
     text: "oklch(0.48 0.02 106)",
     dot: "oklch(0.6 0.02 106)",
@@ -129,9 +128,9 @@ function levelBadge(value: string) {
       {value.charAt(0).toUpperCase() + value.slice(1)}
     </span>
   );
-}
+});
 
-function actionBadge(value: string) {
+const ActionBadge = memo(function ActionBadge({ value }: { value: string }) {
   const isUrgent = value.toLowerCase().includes("contactar");
   return (
     <span
@@ -150,9 +149,9 @@ function actionBadge(value: string) {
       {value.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())}
     </span>
   );
-}
+});
 
-function scoreBadge(score: string) {
+const ScoreBadge = memo(function ScoreBadge({ score }: { score: string }) {
   const num = parseInt(score, 10);
   if (isNaN(num))
     return (
@@ -170,7 +169,155 @@ function scoreBadge(score: string) {
       {num}
     </span>
   );
-}
+});
+
+const DetailPanel = memo(function DetailPanel({
+  lead,
+  onClose,
+}: {
+  lead: Lead;
+  onClose: () => void;
+}) {
+  return (
+    <div
+      className="border-t p-6"
+      style={{ background: "oklch(0.98 0.002 106)", borderColor: "oklch(0.92 0.004 106)" }}
+    >
+      <div className="mb-4 flex items-center justify-between">
+        <h3 className="text-sm font-semibold" style={{ fontFamily: "var(--font-display)" }}>
+          Detalle: {lead.nombre}
+        </h3>
+        <button
+          onClick={onClose}
+          className="text-xs underline"
+          style={{ color: "var(--muted-foreground)" }}
+        >
+          Cerrar
+        </button>
+      </div>
+      <div className="grid gap-4 md:grid-cols-2">
+        <div>
+          <div
+            className="mb-1 text-[10px] font-semibold uppercase tracking-wider"
+            style={{ color: "oklch(0.45 0.1 145)" }}
+          >
+            Senales positivas
+          </div>
+          <p className="text-sm leading-relaxed" style={{ color: "var(--muted-foreground)" }}>
+            {lead.senalesPositivas || "N/A"}
+          </p>
+        </div>
+        <div>
+          <div
+            className="mb-1 text-[10px] font-semibold uppercase tracking-wider"
+            style={{ color: "oklch(0.55 0.12 25)" }}
+          >
+            Senales negativas
+          </div>
+          <p className="text-sm leading-relaxed" style={{ color: "var(--muted-foreground)" }}>
+            {lead.senalesNegativas || "N/A"}
+          </p>
+        </div>
+        <div>
+          <div
+            className="mb-1 text-[10px] font-semibold uppercase tracking-wider"
+            style={{ color: "oklch(0.5 0.12 80)" }}
+          >
+            Preguntas clave
+          </div>
+          <p className="text-sm leading-relaxed" style={{ color: "var(--muted-foreground)" }}>
+            {lead.preguntas || "N/A"}
+          </p>
+        </div>
+        <div>
+          <div
+            className="mb-1 text-[10px] font-semibold uppercase tracking-wider"
+            style={{ color: "var(--muted-foreground)" }}
+          >
+            Mensaje sugerido
+          </div>
+          <p className="text-sm leading-relaxed" style={{ color: "var(--muted-foreground)" }}>
+            {lead.mensaje || "N/A"}
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+});
+
+const MobileDetailPanel = memo(function MobileDetailPanel({
+  lead,
+  onClose,
+}: {
+  lead: Lead;
+  onClose: () => void;
+}) {
+  return (
+    <div
+      className="border-t p-4"
+      style={{ background: "oklch(0.98 0.002 106)", borderColor: "oklch(0.92 0.004 106)" }}
+    >
+      <div className="mb-4 flex items-center justify-between">
+        <h3 className="text-sm font-semibold" style={{ fontFamily: "var(--font-display)" }}>
+          Detalle
+        </h3>
+        <button
+          onClick={onClose}
+          className="text-xs underline"
+          style={{ color: "var(--muted-foreground)" }}
+        >
+          Cerrar
+        </button>
+      </div>
+      <div className="space-y-4">
+        <div>
+          <div
+            className="mb-1 text-[10px] font-semibold uppercase tracking-wider"
+            style={{ color: "oklch(0.45 0.1 145)" }}
+          >
+            Senales positivas
+          </div>
+          <p className="text-sm leading-relaxed" style={{ color: "var(--muted-foreground)" }}>
+            {lead.senalesPositivas || "N/A"}
+          </p>
+        </div>
+        <div>
+          <div
+            className="mb-1 text-[10px] font-semibold uppercase tracking-wider"
+            style={{ color: "oklch(0.55 0.12 25)" }}
+          >
+            Senales negativas
+          </div>
+          <p className="text-sm leading-relaxed" style={{ color: "var(--muted-foreground)" }}>
+            {lead.senalesNegativas || "N/A"}
+          </p>
+        </div>
+        <div>
+          <div
+            className="mb-1 text-[10px] font-semibold uppercase tracking-wider"
+            style={{ color: "oklch(0.5 0.12 80)" }}
+          >
+            Preguntas
+          </div>
+          <p className="text-sm leading-relaxed" style={{ color: "var(--muted-foreground)" }}>
+            {lead.preguntas || "N/A"}
+          </p>
+        </div>
+        <div>
+          <div
+            className="mb-1 text-[10px] font-semibold uppercase tracking-wider"
+            style={{ color: "var(--muted-foreground)" }}
+          >
+            Mensaje
+          </div>
+          <p className="text-sm leading-relaxed" style={{ color: "var(--muted-foreground)" }}>
+            {lead.mensaje || "N/A"}
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+});
 
 function Dashboard() {
   const [leads, setLeads] = useState<Lead[]>([]);
@@ -251,6 +398,11 @@ function Dashboard() {
   const highIntent = leads.filter((l) => l.interes.toLowerCase() === "alta").length;
   const highBudget = leads.filter((l) => l.presupuesto.toLowerCase() === "alto").length;
   const pendingQual = leads.filter((l) => l.status === "pending" || !l.score).length;
+
+  const expandedLead = useMemo(
+    () => leads.find((l) => l.id === expandedId) ?? null,
+    [leads, expandedId],
+  );
 
   return (
     <div
@@ -547,10 +699,18 @@ function Dashboard() {
                           >
                             {l.lada} {l.telefono}
                           </td>
-                          <td className="px-4 py-3">{scoreBadge(l.score)}</td>
-                          <td className="px-4 py-3">{levelBadge(l.presupuesto)}</td>
-                          <td className="px-4 py-3">{levelBadge(l.interes)}</td>
-                          <td className="px-4 py-3">{actionBadge(l.accion)}</td>
+                          <td className="px-4 py-3">
+                            <ScoreBadge score={l.score} />
+                          </td>
+                          <td className="px-4 py-3">
+                            <LevelBadge value={l.presupuesto} />
+                          </td>
+                          <td className="px-4 py-3">
+                            <LevelBadge value={l.interes} />
+                          </td>
+                          <td className="px-4 py-3">
+                            <ActionBadge value={l.accion} />
+                          </td>
                           <td className="px-4 py-3">
                             <button
                               onClick={() => setExpandedId(expanded ? null : l.id)}
@@ -568,94 +728,9 @@ function Dashboard() {
               </div>
 
               {/* Expanded detail panel */}
-              {expandedId &&
-                (() => {
-                  const lead = leads.find((l) => l.id === expandedId);
-                  if (!lead) return null;
-                  return (
-                    <div
-                      className="border-t p-6"
-                      style={{
-                        background: "oklch(0.98 0.002 106)",
-                        borderColor: "oklch(0.92 0.004 106)",
-                      }}
-                    >
-                      <div className="mb-4 flex items-center justify-between">
-                        <h3
-                          className="text-sm font-semibold"
-                          style={{ fontFamily: "var(--font-display)" }}
-                        >
-                          Detalle: {lead.nombre}
-                        </h3>
-                        <button
-                          onClick={() => setExpandedId(null)}
-                          className="text-xs underline"
-                          style={{ color: "var(--muted-foreground)" }}
-                        >
-                          Cerrar
-                        </button>
-                      </div>
-                      <div className="grid gap-4 md:grid-cols-2">
-                        <div>
-                          <div
-                            className="mb-1 text-[10px] font-semibold uppercase tracking-wider"
-                            style={{ color: "oklch(0.45 0.1 145)" }}
-                          >
-                            Senales positivas
-                          </div>
-                          <p
-                            className="text-sm leading-relaxed"
-                            style={{ color: "var(--muted-foreground)" }}
-                          >
-                            {lead.senalesPositivas || "N/A"}
-                          </p>
-                        </div>
-                        <div>
-                          <div
-                            className="mb-1 text-[10px] font-semibold uppercase tracking-wider"
-                            style={{ color: "oklch(0.55 0.12 25)" }}
-                          >
-                            Senales negativas
-                          </div>
-                          <p
-                            className="text-sm leading-relaxed"
-                            style={{ color: "var(--muted-foreground)" }}
-                          >
-                            {lead.senalesNegativas || "N/A"}
-                          </p>
-                        </div>
-                        <div>
-                          <div
-                            className="mb-1 text-[10px] font-semibold uppercase tracking-wider"
-                            style={{ color: "oklch(0.5 0.12 80)" }}
-                          >
-                            Preguntas clave
-                          </div>
-                          <p
-                            className="text-sm leading-relaxed"
-                            style={{ color: "var(--muted-foreground)" }}
-                          >
-                            {lead.preguntas || "N/A"}
-                          </p>
-                        </div>
-                        <div>
-                          <div
-                            className="mb-1 text-[10px] font-semibold uppercase tracking-wider"
-                            style={{ color: "var(--muted-foreground)" }}
-                          >
-                            Mensaje sugerido
-                          </div>
-                          <p
-                            className="text-sm leading-relaxed"
-                            style={{ color: "var(--muted-foreground)" }}
-                          >
-                            {lead.mensaje || "N/A"}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })()}
+              {expandedLead && (
+                <DetailPanel lead={expandedLead} onClose={() => setExpandedId(null)} />
+              )}
 
               {/* Mobile */}
               <div className="md:hidden">
@@ -680,7 +755,7 @@ function Dashboard() {
                               {l.email}
                             </div>
                           </div>
-                          {scoreBadge(l.score)}
+                          <ScoreBadge score={l.score} />
                         </div>
                         <div
                           className="flex items-center gap-4 text-xs mb-3"
@@ -690,19 +765,19 @@ function Dashboard() {
                             <span className="mb-1 block text-[10px] font-semibold uppercase tracking-wider">
                               Presupuesto
                             </span>
-                            {levelBadge(l.presupuesto)}
+                            <LevelBadge value={l.presupuesto} />
                           </div>
                           <div>
                             <span className="mb-1 block text-[10px] font-semibold uppercase tracking-wider">
                               Interes
                             </span>
-                            {levelBadge(l.interes)}
+                            <LevelBadge value={l.interes} />
                           </div>
                           <div>
                             <span className="mb-1 block text-[10px] font-semibold uppercase tracking-wider">
                               Accion
                             </span>
-                            {actionBadge(l.accion)}
+                            <ActionBadge value={l.accion} />
                           </div>
                         </div>
                         <button
@@ -713,88 +788,11 @@ function Dashboard() {
                           {l.summary}
                         </button>
                       </div>
-                      {expanded && (
-                        <div
-                          className="border-t p-4"
-                          style={{
-                            background: "oklch(0.98 0.002 106)",
-                            borderColor: "oklch(0.92 0.004 106)",
-                          }}
-                        >
-                          <div className="mb-4 flex items-center justify-between">
-                            <h3
-                              className="text-sm font-semibold"
-                              style={{ fontFamily: "var(--font-display)" }}
-                            >
-                              Detalle
-                            </h3>
-                            <button
-                              onClick={() => setExpandedId(null)}
-                              className="text-xs underline"
-                              style={{ color: "var(--muted-foreground)" }}
-                            >
-                              Cerrar
-                            </button>
-                          </div>
-                          <div className="space-y-4">
-                            <div>
-                              <div
-                                className="mb-1 text-[10px] font-semibold uppercase tracking-wider"
-                                style={{ color: "oklch(0.45 0.1 145)" }}
-                              >
-                                Senales positivas
-                              </div>
-                              <p
-                                className="text-sm leading-relaxed"
-                                style={{ color: "var(--muted-foreground)" }}
-                              >
-                                {l.senalesPositivas || "N/A"}
-                              </p>
-                            </div>
-                            <div>
-                              <div
-                                className="mb-1 text-[10px] font-semibold uppercase tracking-wider"
-                                style={{ color: "oklch(0.55 0.12 25)" }}
-                              >
-                                Senales negativas
-                              </div>
-                              <p
-                                className="text-sm leading-relaxed"
-                                style={{ color: "var(--muted-foreground)" }}
-                              >
-                                {l.senalesNegativas || "N/A"}
-                              </p>
-                            </div>
-                            <div>
-                              <div
-                                className="mb-1 text-[10px] font-semibold uppercase tracking-wider"
-                                style={{ color: "oklch(0.5 0.12 80)" }}
-                              >
-                                Preguntas
-                              </div>
-                              <p
-                                className="text-sm leading-relaxed"
-                                style={{ color: "var(--muted-foreground)" }}
-                              >
-                                {l.preguntas || "N/A"}
-                              </p>
-                            </div>
-                            <div>
-                              <div
-                                className="mb-1 text-[10px] font-semibold uppercase tracking-wider"
-                                style={{ color: "var(--muted-foreground)" }}
-                              >
-                                Mensaje
-                              </div>
-                              <p
-                                className="text-sm leading-relaxed"
-                                style={{ color: "var(--muted-foreground)" }}
-                              >
-                                {l.mensaje || "N/A"}
-                              </p>
-                            </div>
-                          </div>
-                        </div>
+                      {expanded && expandedLead && (
+                        <MobileDetailPanel
+                          lead={expandedLead}
+                          onClose={() => setExpandedId(null)}
+                        />
                       )}
                     </div>
                   );

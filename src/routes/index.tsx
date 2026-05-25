@@ -168,8 +168,8 @@ function LeadForm() {
             "https://hook.us2.make.com/9naat1jo6cw0bqqlheau4ylgih331jky",
             {
               method: "POST",
-              headers: { "Content-Type": "application/x-www-form-urlencoded" },
-              body: new URLSearchParams({
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
                 nombre,
                 whatsapp: `${lada} ${telefono}`.trim(),
                 lada,
@@ -178,7 +178,7 @@ function LeadForm() {
                 inicio,
                 source: "devpath-landing",
                 submittedAt: new Date().toISOString(),
-              }).toString(),
+              }),
             },
           )) as Response;
           if (!res.ok) {
@@ -210,17 +210,23 @@ function LeadForm() {
         <button
           type="button"
           onClick={() => {
+            console.log("Precargar demo clicked");
             setNombre("Angel Zorrilla");
             setLada("+52");
             setTelefono("9512103083");
             setEmail("whoangel.agl@gmail.com");
             setInicio("En 1 a 3 meses");
+            setAccepted(true);
+            setFieldErrors({});
+            setTouched({});
           }}
           className="shrink-0 rounded-md px-2.5 py-1.5 text-[10px] font-semibold uppercase tracking-wide transition-all duration-150 hover:opacity-80"
           style={{
             background: "var(--canvas-deep)",
             color: "var(--text-muted)",
             border: "1px solid var(--border-dark)",
+            zIndex: 10,
+            position: "relative",
           }}
           title="Precargar datos de prueba"
         >
@@ -318,7 +324,8 @@ function LeadForm() {
             type="checkbox"
             checked={accepted}
             onChange={(e) => setAccepted(e.target.checked)}
-            className="mt-0.5 h-4 w-4 cursor-pointer accent-brand"
+            className="mt-0.5 h-4 w-4 cursor-pointer"
+            style={{ accentColor: "var(--brand)" }}
           />
           <span className="text-xs leading-relaxed" style={{ color: "var(--text-muted)" }}>
             Acepto que DevPath me contacte mediante llamadas, incluyendo automatizadas, con fines
