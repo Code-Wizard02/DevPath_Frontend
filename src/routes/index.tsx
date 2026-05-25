@@ -47,17 +47,7 @@ function LeadForm() {
   const [telefono, setTelefono] = useState("");
   const [email, setEmail] = useState("");
   const [inicio, setInicio] = useState("");
-  const [touched, setTouched] = useState<Record<string, boolean>>({});
   const [fieldErrors, setFieldErrors] = useState<LeadErrors>({});
-
-  const validateField = (name: keyof typeof leadSchema.shape, value: string) => {
-    const partial = leadSchema.pick({ [name]: true } as any);
-    const result = partial.safeParse({ [name]: value });
-    if (!result.success) {
-      return result.error.errors[0]?.message;
-    }
-    return undefined;
-  };
 
   const fetchWithTimeout = (url: string, options: RequestInit, timeoutMs = 10000) => {
     return Promise.race([
@@ -71,23 +61,6 @@ function LeadForm() {
       return "Error de autorizacion. Por favor intenta mas tarde.";
     if (status >= 500) return "El servidor no respondio. Intenta de nuevo en unos momentos.";
     return "No pudimos enviar tu informacion. Intenta de nuevo.";
-  };
-
-  const handleBlur = (name: keyof typeof leadSchema.shape, value: string) => {
-    setTouched((prev) => ({ ...prev, [name]: true }));
-    const err = validateField(name, value);
-    setFieldErrors((prev) => ({ ...prev, [name]: err }));
-  };
-
-  const handleChange = (name: keyof typeof leadSchema.shape, value: string) => {
-    if (name === "nombre") setNombre(value);
-    if (name === "telefono") setTelefono(value);
-    if (name === "email") setEmail(value);
-    if (name === "inicio") setInicio(value);
-    if (touched[name]) {
-      const err = validateField(name, value);
-      setFieldErrors((prev) => ({ ...prev, [name]: err }));
-    }
   };
 
   if (submitted) {
@@ -115,36 +88,6 @@ function LeadForm() {
     );
   }
 
-  const inputBase: CSSProperties = {
-    background: "var(--canvas-deep)",
-    border: "1px solid var(--border-dark)",
-    borderRadius: 8,
-    padding: "10px 14px",
-    fontFamily: "var(--font-body)",
-    fontSize: 14,
-    width: "100%",
-    color: "#fff",
-    outline: "none",
-    transition: "border-color 0.2s, box-shadow 0.2s",
-  };
-
-  const getInputStyle = (fieldName: string): CSSProperties => {
-    const hasError = !!fieldErrors[fieldName as keyof LeadErrors];
-    return {
-      ...inputBase,
-      borderColor: hasError ? "var(--rose)" : undefined,
-    };
-  };
-
-  const labelStyle: CSSProperties = {
-    fontFamily: "var(--font-body)",
-    fontSize: 12,
-    fontWeight: 500,
-    color: "var(--text-muted)",
-    marginBottom: 6,
-    display: "block",
-  };
-
   return (
     <form
       onSubmit={async (e) => {
@@ -158,13 +101,12 @@ function LeadForm() {
             if (!errors[key]) errors[key] = err.message;
           }
           setFieldErrors(errors);
-          setTouched({ nombre: true, telefono: true, email: true, inicio: true });
           return;
         }
         setSubmitting(true);
         setError(null);
         try {
-          const res = (await fetchWithTimeout(
+          const res = await fetchWithTimeout(
             "https://hook.us2.make.com/9naat1jo6cw0bqqlheau4ylgih331jky",
             {
               method: "POST",
@@ -180,7 +122,7 @@ function LeadForm() {
                 submittedAt: new Date().toISOString(),
               }),
             },
-          )) as Response;
+          );
           if (!res.ok) {
             setError(getErrorMessage(res.status));
             return;
@@ -210,7 +152,6 @@ function LeadForm() {
         <button
           type="button"
           onClick={() => {
-            console.log("Precargar demo clicked");
             setNombre("Angel Zorrilla");
             setLada("+52");
             setTelefono("9512103083");
@@ -218,30 +159,47 @@ function LeadForm() {
             setInicio("En 1 a 3 meses");
             setAccepted(true);
             setFieldErrors({});
-            setTouched({});
           }}
-          className="shrink-0 rounded-md px-2.5 py-1.5 text-[10px] font-semibold uppercase tracking-wide transition-all duration-150 hover:opacity-80"
+          className="shrink-0 rounded-md px-2.5 py-1.5 text-[10px] font-semibold uppercase tracking-wide hover:opacity-80"
           style={{
             background: "var(--canvas-deep)",
             color: "var(--text-muted)",
             border: "1px solid var(--border-dark)",
-            zIndex: 10,
-            position: "relative",
           }}
-          title="Precargar datos de prueba"
         >
           Precargar demo
         </button>
       </div>
       <div className="flex flex-col gap-4">
         <div>
-          <label style={labelStyle}>Nombre</label>
+          <label
+            style={{
+              fontFamily: "var(--font-body)",
+              fontSize: 12,
+              fontWeight: 500,
+              color: "var(--text-muted)",
+              marginBottom: 6,
+              display: "block",
+            }}
+          >
+            Nombre
+          </label>
           <input
-            style={getInputStyle("nombre")}
+            style={{
+              background: "var(--canvas-deep)",
+              border: "1px solid",
+              borderColor: fieldErrors.nombre ? "var(--rose)" : "var(--border-dark)",
+              borderRadius: 8,
+              padding: "10px 14px",
+              fontFamily: "var(--font-body)",
+              fontSize: 14,
+              width: "100%",
+              color: "#fff",
+              outline: "none",
+            }}
             placeholder="Tu nombre completo"
             value={nombre}
-            onChange={(e) => handleChange("nombre", e.target.value)}
-            onBlur={(e) => handleBlur("nombre", e.target.value)}
+            onChange={(e) => setNombre(e.target.value)}
           />
           {fieldErrors.nombre && (
             <p className="mt-1 text-xs" style={{ color: "var(--rose)" }}>
@@ -249,14 +207,35 @@ function LeadForm() {
             </p>
           )}
         </div>
-
         <div>
-          <label style={labelStyle}>Telefono</label>
+          <label
+            style={{
+              fontFamily: "var(--font-body)",
+              fontSize: 12,
+              fontWeight: 500,
+              color: "var(--text-muted)",
+              marginBottom: 6,
+              display: "block",
+            }}
+          >
+            Telefono
+          </label>
           <div className="flex gap-2">
             <select
-              style={{ ...getInputStyle("lada"), width: 80, flexShrink: 0 }}
               value={lada}
               onChange={(e) => setLada(e.target.value)}
+              style={{
+                background: "var(--canvas-deep)",
+                border: "1px solid var(--border-dark)",
+                borderRadius: 8,
+                padding: "10px 14px",
+                fontFamily: "var(--font-body)",
+                fontSize: 14,
+                color: "#fff",
+                outline: "none",
+                width: 80,
+                flexShrink: 0,
+              }}
             >
               <option value="+52">+52</option>
               <option value="+57">+57</option>
@@ -265,12 +244,22 @@ function LeadForm() {
               <option value="+51">+51</option>
             </select>
             <input
-              style={getInputStyle("telefono")}
-              placeholder="55 1234 5678"
               type="tel"
+              placeholder="55 1234 5678"
               value={telefono}
-              onChange={(e) => handleChange("telefono", e.target.value)}
-              onBlur={(e) => handleBlur("telefono", e.target.value)}
+              onChange={(e) => setTelefono(e.target.value)}
+              style={{
+                background: "var(--canvas-deep)",
+                border: "1px solid",
+                borderColor: fieldErrors.telefono ? "var(--rose)" : "var(--border-dark)",
+                borderRadius: 8,
+                padding: "10px 14px",
+                fontFamily: "var(--font-body)",
+                fontSize: 14,
+                width: "100%",
+                color: "#fff",
+                outline: "none",
+              }}
             />
           </div>
           {fieldErrors.telefono && (
@@ -279,16 +268,36 @@ function LeadForm() {
             </p>
           )}
         </div>
-
         <div>
-          <label style={labelStyle}>Email</label>
+          <label
+            style={{
+              fontFamily: "var(--font-body)",
+              fontSize: 12,
+              fontWeight: 500,
+              color: "var(--text-muted)",
+              marginBottom: 6,
+              display: "block",
+            }}
+          >
+            Email
+          </label>
           <input
-            style={getInputStyle("email")}
-            placeholder="tu@email.com"
             type="email"
+            placeholder="tu@email.com"
             value={email}
-            onChange={(e) => handleChange("email", e.target.value)}
-            onBlur={(e) => handleBlur("email", e.target.value)}
+            onChange={(e) => setEmail(e.target.value)}
+            style={{
+              background: "var(--canvas-deep)",
+              border: "1px solid",
+              borderColor: fieldErrors.email ? "var(--rose)" : "var(--border-dark)",
+              borderRadius: 8,
+              padding: "10px 14px",
+              fontFamily: "var(--font-body)",
+              fontSize: 14,
+              width: "100%",
+              color: "#fff",
+              outline: "none",
+            }}
           />
           {fieldErrors.email && (
             <p className="mt-1 text-xs" style={{ color: "var(--rose)" }}>
@@ -296,14 +305,34 @@ function LeadForm() {
             </p>
           )}
         </div>
-
         <div>
-          <label style={labelStyle}>Cuando quieres empezar?</label>
+          <label
+            style={{
+              fontFamily: "var(--font-body)",
+              fontSize: 12,
+              fontWeight: 500,
+              color: "var(--text-muted)",
+              marginBottom: 6,
+              display: "block",
+            }}
+          >
+            Cuando quieres empezar?
+          </label>
           <select
-            style={getInputStyle("inicio")}
             value={inicio}
-            onChange={(e) => handleChange("inicio", e.target.value)}
-            onBlur={(e) => handleBlur("inicio", e.target.value)}
+            onChange={(e) => setInicio(e.target.value)}
+            style={{
+              background: "var(--canvas-deep)",
+              border: "1px solid",
+              borderColor: fieldErrors.inicio ? "var(--rose)" : "var(--border-dark)",
+              borderRadius: 8,
+              padding: "10px 14px",
+              fontFamily: "var(--font-body)",
+              fontSize: 14,
+              width: "100%",
+              color: "#fff",
+              outline: "none",
+            }}
           >
             <option value="" disabled>
               Selecciona una opcion
@@ -318,7 +347,6 @@ function LeadForm() {
             </p>
           )}
         </div>
-
         <div className="mt-1 flex items-start gap-3">
           <input
             type="checkbox"
@@ -331,16 +359,11 @@ function LeadForm() {
             Acepto que DevPath me contacte mediante llamadas, incluyendo automatizadas, con fines
             informativos y comerciales. Puedo revocar este consentimiento escribiendo a
             privacidad@devpath.mx.{" "}
-            <a
-              href="#"
-              className="underline transition-colors hover:text-white"
-              style={{ color: "var(--brand)" }}
-            >
+            <a href="#" className="underline hover:text-white" style={{ color: "var(--brand)" }}>
               Aviso de Privacidad
             </a>
           </span>
         </div>
-
         {error && (
           <div
             className="rounded-lg p-3 text-sm"
@@ -349,26 +372,25 @@ function LeadForm() {
             {error}
           </div>
         )}
-
         <button
           type="submit"
           disabled={!accepted || submitting}
-          className="w-full rounded-lg py-3.5 text-sm font-semibold uppercase tracking-wide transition-all duration-200"
           style={{
+            width: "100%",
+            borderRadius: 8,
+            padding: "14px 0",
+            fontSize: 14,
+            fontWeight: 600,
+            textTransform: "uppercase",
+            letterSpacing: "0.05em",
             background: accepted && !submitting ? "var(--brand)" : "var(--canvas-deep)",
             color: accepted && !submitting ? "var(--canvas-deep)" : "var(--text-dim)",
             cursor: accepted && !submitting ? "pointer" : "not-allowed",
+            border: "none",
             boxShadow: accepted && !submitting ? "0 4px 20px var(--brand-glow)" : undefined,
           }}
         >
-          {submitting ? (
-            <span className="inline-flex items-center gap-2">
-              <span className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
-              Enviando...
-            </span>
-          ) : (
-            "Quiero informacion"
-          )}
+          {submitting ? "Enviando..." : "Quiero informacion"}
         </button>
       </div>
     </form>
