@@ -98,50 +98,6 @@ function LeadForm() {
 
   return (
     <form
-      onSubmit={async (e) => {
-        e.preventDefault();
-        if (submitting) return;
-        const result = leadSchema.safeParse({ nombre, telefono, email, inicio });
-        if (!result.success) {
-          const errors: LeadErrors = {};
-          for (const err of result.error.errors) {
-            const key = err.path[0] as keyof LeadErrors;
-            if (!errors[key]) errors[key] = err.message;
-          }
-          setFieldErrors(errors);
-          return;
-        }
-        setSubmitting(true);
-        setError(null);
-        try {
-          const res = await fetchWithTimeout(
-            "https://hook.us2.make.com/9naat1jo6cw0bqqlheau4ylgih331jky",
-            {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                nombre,
-                whatsapp: `${lada} ${telefono}`.trim(),
-                lada,
-                telefono,
-                email,
-                inicio,
-                source: "devpath-landing",
-                submittedAt: new Date().toISOString(),
-              }),
-            },
-          );
-          if (!res.ok) {
-            setError(getErrorMessage(res.status));
-            return;
-          }
-          setSubmitted(true);
-        } catch {
-          setError("No pudimos enviar tu informacion. Intenta de nuevo.");
-        } finally {
-          setSubmitting(false);
-        }
-      }}
       className="rounded-2xl border border-border-dark/50 p-7"
       style={{ background: "var(--canvas-elevated)" }}
     >
@@ -380,8 +336,51 @@ function LeadForm() {
           </div>
         )}
         <button
-          type="submit"
+          type="button"
           disabled={submitting}
+          onClick={async () => {
+            if (submitting) return;
+            const result = leadSchema.safeParse({ nombre, telefono, email, inicio });
+            if (!result.success) {
+              const errors: LeadErrors = {};
+              for (const err of result.error.errors) {
+                const key = err.path[0] as keyof LeadErrors;
+                if (!errors[key]) errors[key] = err.message;
+              }
+              setFieldErrors(errors);
+              return;
+            }
+            setSubmitting(true);
+            setError(null);
+            try {
+              const res = await fetchWithTimeout(
+                "https://hook.us2.make.com/9naat1jo6cw0bqqlheau4ylgih331jky",
+                {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({
+                    nombre,
+                    whatsapp: `${lada} ${telefono}`.trim(),
+                    lada,
+                    telefono,
+                    email,
+                    inicio,
+                    source: "devpath-landing",
+                    submittedAt: new Date().toISOString(),
+                  }),
+                },
+              );
+              if (!res.ok) {
+                setError(getErrorMessage(res.status));
+                return;
+              }
+              setSubmitted(true);
+            } catch {
+              setError("No pudimos enviar tu informacion. Intenta de nuevo.");
+            } finally {
+              setSubmitting(false);
+            }
+          }}
           style={{
             width: "100%",
             borderRadius: 8,
